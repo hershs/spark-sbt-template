@@ -1,7 +1,7 @@
 import sbtassembly.AssemblyKeys.assembly
 
-name := "spark-sbt-template"
-organization := "com.funkod.spark"
+name := "payment-system-spark"
+organization := "com.intuit.spark"
 
 crossScalaVersions := Seq("2.11.12", "2.12.12")
 releaseIgnoreUntrackedFiles := true
@@ -18,7 +18,9 @@ val sparkVersion = "2.4.4"
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion % Provided,
   "org.apache.spark" %% "spark-sql" % sparkVersion % Provided,
+  "org.apache.spark" %% "spark-streaming" % sparkVersion % Provided,
   "org.apache.hadoop" % "hadoop-aws" % "2.8.3" % Provided,
+  "org.apache.spark" %% "spark-sql-kafka-0-10" % sparkVersion,
   "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
 publishTo := {
