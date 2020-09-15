@@ -8,6 +8,7 @@ releaseIgnoreUntrackedFiles := true
 parallelExecution in Test := false
 fork in Test := true
 publishMavenStyle := true
+releaseCrossBuild := true // publish all scala versions in release plugin
 assemblyJarName in assembly := s"${name.value}-assembly_${scalaBinaryVersion.value}-${version.value}.jar"
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 // when running "clean assembly 'release with-defaults'" create assembly artifact also
