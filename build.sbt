@@ -14,11 +14,16 @@ assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeSca
 // when running "clean assembly 'release with-defaults'" create assembly artifact also
 addArtifact(artifact in(Compile, assembly), assembly)
 
-val sparkVersion = "2.4.4"
+lazy val sparkVersion = SettingKey[String]("sparkVersion")
+
+sparkVersion := (scalaBinaryVersion.value match {
+  case "2.11" => "2.4.5"
+  case "2.12" => "3.0.0"
+})
 
 libraryDependencies ++= Seq(
-  "org.apache.spark" %% "spark-core" % sparkVersion % Provided,
-  "org.apache.spark" %% "spark-sql" % sparkVersion % Provided,
+  "org.apache.spark" %% "spark-core" % sparkVersion.value % Provided,
+  "org.apache.spark" %% "spark-sql" % sparkVersion.value % Provided,
   "org.apache.hadoop" % "hadoop-aws" % "2.8.3" % Provided,
   "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
