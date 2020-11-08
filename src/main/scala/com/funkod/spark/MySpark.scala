@@ -1,9 +1,19 @@
 package com.funkod.spark
 
+import java.net.URI
+
+import com.typesafe.config.{Config, ConfigFactory}
+import org.apache.commons.io.IOUtils
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import org.slf4j.{Logger, LoggerFactory}
+import pureconfig.generic.ProductHint
+import pureconfig.generic.auto.exportReader
+import pureconfig.{CamelCase, ConfigFieldMapping}
+
 
 object MySpark {
   val logger: Logger = LoggerFactory.getLogger(this.getClass)
@@ -11,24 +21,36 @@ object MySpark {
   val dateParser: DateTimeFormatter = DateTimeFormat.forPattern(DATE_FORMAT).withZoneUTC()
 
   def getConfiguration(args: Array[String]): MySparkConf = {
-    logger.info("Started With Arguments [" + args.mkString(",") + "]")
-    if (args.length != 3) {
-      throw new Exception("3 arguments expected: inputPath, outputPath, date!")
+    if (args.length != 2) {
+      throw new Exception("2 arguments expected!")
     }
-    MySparkConf(args(0) + "/date=" + args(2), args(1) + "/date=" + args(2))
+    val confPath = args(0)
+    logger.info("Loading config file " + confPath)
+    // load configuration from s3\local as string
+    val fs = FileSystem.get(URI.create(confPath), new Configuration())
+    val inputStream = fs.open(new Path(confPath))
+    val fileContent = IOUtils.toString(inputStream)
+    inputStream.close()
+    logger.info(s"Configuration ->\n$fileContent\n<-")
+
+    implicit def hint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
+
+    val typesafeConfig: Config = ConfigFactory.parseString(fileContent)
+    val config = pureconfig.loadConfigOrThrow[MySparkConf](typesafeConfig)
+    config.runDateStr = args(1)
+    config
   }
 
   def main(args: Array[String]): Unit = {
     val spark = getSparkSession
     val conf = getConfiguration(args)
-    import spark.implicits._
     val start = System.currentTimeMillis()
     spark
       .read
-      .parquet(conf.inputPath)
+      .parquet(conf.inputPath + "date=" + conf.runDateStr)
       // your stuff
       .write
-      .parquet(conf.outputPath)
+      .parquet(conf.outputPath + "date=" + conf.runDateStr)
     spark.close()
     logger.info(s"Process finished in " + (System.currentTimeMillis() - start) + "ms")
   }

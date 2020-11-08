@@ -22,6 +22,7 @@ sparkVersion := (scalaBinaryVersion.value match {
 })
 
 libraryDependencies ++= Seq(
+  "com.github.pureconfig" %% "pureconfig" % "0.10.1",
   "org.apache.spark" %% "spark-core" % sparkVersion.value % Provided,
   "org.apache.spark" %% "spark-sql" % sparkVersion.value % Provided,
   "org.apache.hadoop" % "hadoop-aws" % "2.8.3" % Provided,

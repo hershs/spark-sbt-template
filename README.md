@@ -2,6 +2,7 @@
 This is my version of simple sbt spark project
 
 ## Features
+* Load configuration from a file (local or remote) by [pureconfig](https://pureconfig.github.io/)
 * Include assembly plugin
 * Include release plugin
 * Include test of main function, 100% test coverage 
